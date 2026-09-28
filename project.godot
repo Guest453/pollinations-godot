@@ -1,0 +1,20 @@
+; Engine configuration file.
+; Pollinations AI example project
+
+config_version=5
+
+[application]
+
+config/name="Pollinations for Godot 4 - Example"
+config/description="Example project for the Pollinations AI add-on: text, image and speech generation nodes."
+run/main_scene="res://examples/example_scene.tscn"
+config/features=PackedStringArray("4.7")
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/pollinations/plugin.cfg")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

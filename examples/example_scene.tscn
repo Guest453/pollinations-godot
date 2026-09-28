@@ -1,0 +1,90 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://examples/example_scene.gd" id="1_exgd"]
+[ext_resource type="Script" path="res://addons/pollinations/nodes/pollinations_text.gd" id="2_txt"]
+[ext_resource type="Script" path="res://addons/pollinations/nodes/pollinations_image.gd" id="3_img"]
+[ext_resource type="Script" path="res://addons/pollinations/nodes/pollinations_speech.gd" id="4_speech"]
+
+[node name="ExampleRoot" type="Control"]
+layout_mode=3
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+script=ExtResource("1_exgd")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode=1
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+color=Color(0.08, 0.09, 0.12, 1)
+
+[node name="Title" type="Label" parent="."]
+layout_mode=1
+anchors_preset=10
+anchor_right=1.0
+offset_top=16.0
+offset_bottom=60.0
+text="Pollinations for Godot 4 - text / image / speech demo"
+horizontal_alignment=1
+theme_override_font_sizes/font_size=28
+
+[node name="PromptInput" type="LineEdit" parent="."]
+layout_mode=1
+anchors_preset=10
+anchor_right=1.0
+offset_left=80.0
+offset_top=90.0
+offset_right=-80.0
+offset_bottom=130.0
+placeholder_text="Type a prompt, then press Enter (text + image + speech are all generated)"
+caret_blink=true
+
+[node name="Output" type="RichTextLabel" parent="."]
+layout_mode=1
+anchors_preset=15
+anchor_top=0.25
+anchor_right=0.5
+anchor_bottom=1.0
+offset_left=80.0
+offset_top=-40.0
+offset_right=-40.0
+offset_bottom=-40.0
+bbcode_enabled=true
+text="Model replies appear here."
+
+[node name="ImageHolder" type="TextureRect" parent="."]
+layout_mode=1
+anchors_preset=15
+anchor_left=0.55
+anchor_top=0.25
+anchor_right=0.95
+anchor_bottom=0.85
+offset_left=40.0
+offset_top=-40.0
+expand_mode=1
+stretch_mode=5
+
+[node name="Status" type="Label" parent="."]
+layout_mode=1
+anchors_preset=12
+anchor_top=1.0
+anchor_right=1.0
+anchor_bottom=1.0
+offset_top=-48.0
+offset_bottom=-16.0
+offset_left=80.0
+horizontal_alignment=1
+text="idle"
+
+[node name="PollinationsText" type="Node" parent="."]
+script=ExtResource("2_txt")
+system_prompt="You are a concise game NPC. Answer in one short sentence."
+
+[node name="PollinationsImage" type="Node" parent="."]
+script=ExtResource("3_img")
+width=512
+height=512
+
+[node name="PollinationsSpeech" type="Node" parent="."]
+script=ExtResource("4_speech")
