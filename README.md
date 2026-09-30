@@ -58,9 +58,11 @@ speech.speak("Welcome, adventurer!")
 
 - **Development:** export `POLLINATIONS_API_KEY` with an API key from
   [enter.pollinations.ai/keys](https://enter.pollinations.ai/keys) before
-  launching the editor/game, or set `auth_token` on a node.
+  launching the editor/game, or set `auth_token` from code at runtime.
 - **Players (BYOP device flow):** add a `PollinationsAuth` node next to the
-  generation nodes and start the flow when the player clicks "Connect":
+  generation nodes, set its `app_key` to your game's publishable key from
+  [enter.pollinations.ai/keys](https://enter.pollinations.ai/keys), and start
+  the flow when the player clicks "Connect":
 
 ```gdscript
 var auth: PollinationsAuth = $PollinationsAuth
@@ -72,9 +74,8 @@ auth.start_device_flow()
 
 The player approves the request on enter.pollinations.ai/device and pays
 generation costs with their **own Pollen**. The returned token is kept in
-memory and (optionally) in `user://` project settings; it is **never** bundled
-with your game. Text generation also works fully anonymously, so you can ship
-a demo with zero setup.
+memory only; it is **never** written into the Godot project or scene. Text
+generation also works anonymously, so you can ship a demo with zero setup.
 
 ## Demo / example scene
 
@@ -107,7 +108,7 @@ Latest run (Godot 4.7.1.stable, headless, this repo):
   ok compile: res://addons/pollinations/nodes/pollinations_image.gd
   ok compile: res://addons/pollinations/nodes/pollinations_speech.gd
   ok compile: res://examples/example_scene.gd
-  ok plugin.cfg (script=pollinations.gd)
+  ok plugin.cfg (script=plugin.gd)
   ok instantiate: pollinations_text.gd
   ok instantiate: pollinations_image.gd
   ok instantiate: pollinations_speech.gd
@@ -127,9 +128,10 @@ The example scene itself was also run headless
 ```
 addons/pollinations/
 ├── plugin.cfg                  # editor plugin metadata
-├── pollinations.gd             # EditorPlugin entry point
+├── plugin.gd                   # EditorPlugin entry point
+├── pollinations.gd             # shared helper class
 ├── pollinations_api.gd         # endpoints, model lists, model fetch helper
-├── pollinations_auth.gd        # PollinationsAuth: device flow + token store
+├── pollinations_auth.gd        # PollinationsAuth: device flow + in-memory token
 └── nodes/
     ├── pollinations_text.gd    # PollinationsText
     ├── pollinations_image.gd   # PollinationsImage
@@ -145,8 +147,8 @@ tests/
 
 - Image and audio models require a token (401 without one); text works
   anonymously. The add-on surfaces this as a clear `failed` signal.
-- Generation results are cached to `user://pollinations/` (PNG / WAV) so you
-  can inspect what was produced.
+- Set `save_to_disk` on an image or speech node to keep a copy in
+  `user://pollinations/`; it is off by default.
 - The HTTP endpoints used are the documented Pollinations ones:
   `POST /v1/chat/completions`, `POST /v1/images/generations`,
   `POST /v1/audio/speech`, `GET /{text,image,audio}/models`, plus

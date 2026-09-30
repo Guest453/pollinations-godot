@@ -30,14 +30,14 @@ const SAVE_DIR := "user://pollinations"
 @export_range(0.25, 4.0, 0.05) var speed: float = 1.0
 
 ## Keep a copy of every generated clip in user://pollinations/ .
-@export var save_to_disk: bool = true
+@export var save_to_disk: bool = false
 
 ## Play the clip through a child AudioStreamPlayer as soon as it is ready.
 @export var autoplay: bool = true
 
 ## API key / token. Usually left empty: PollinationsAuth::get_auth_token()
 ## or the POLLINATIONS_API_KEY environment variable is used instead.
-@export var auth_token: String = ""
+var auth_token: String = ""
 
 var _http: HTTPRequest
 var _player: AudioStreamPlayer

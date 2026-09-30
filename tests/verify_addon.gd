@@ -38,6 +38,7 @@ func _fail(msg: String) -> void:
 func _check_scripts_compile() -> void:
 	for path in [
 		"res://addons/pollinations/pollinations.gd",
+		"res://addons/pollinations/plugin.gd",
 		"res://addons/pollinations/pollinations_api.gd",
 		"res://addons/pollinations/pollinations_auth.gd",
 		"res://addons/pollinations/nodes/pollinations_text.gd",
@@ -63,10 +64,20 @@ func _check_plugin_cfg() -> void:
 	if not FileAccess.file_exists("res://addons/pollinations/" + entry_script):
 		_fail("plugin.cfg script does not exist: " + entry_script)
 		return
+	var script: Script = load("res://addons/pollinations/" + entry_script)
+	if script == null or script.get_instance_base_type() != "EditorPlugin":
+		_fail("plugin.cfg script must extend EditorPlugin")
+		return
 	if str(cfg.get_value("plugin", "name", "")).is_empty():
 		_fail("plugin.cfg has no name")
 		return
 	print("  ok plugin.cfg (script=%s)" % entry_script)
+	var auth := PollinationsAuth.new()
+	auth.app_key = "pk_example"
+	auth.token = "sk_player"
+	if auth.get_auth_token() != "sk_player":
+		_fail("player token must take precedence over the publishable app key")
+	auth.free()
 
 
 func _check_nodes_instantiate() -> void:

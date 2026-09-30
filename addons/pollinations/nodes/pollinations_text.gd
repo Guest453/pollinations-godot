@@ -29,7 +29,7 @@ const CHAT_URL := PollinationsAPI.CHAT_COMPLETIONS_URL
 
 ## API key / token. Usually left empty: PollinationsAuth::get_auth_token()
 ## or the POLLINATIONS_API_KEY environment variable is used instead.
-@export var auth_token: String = ""
+var auth_token: String = ""
 
 var _http: HTTPRequest
 

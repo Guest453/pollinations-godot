@@ -27,11 +27,11 @@ const SAVE_DIR := "user://pollinations"
 @export var height: int = 1024
 
 ## Keep a copy of every generated image in user://pollinations/ .
-@export var save_to_disk: bool = true
+@export var save_to_disk: bool = false
 
 ## API key / token. Usually left empty: PollinationsAuth::get_auth_token()
 ## or the POLLINATIONS_API_KEY environment variable is used instead.
-@export var auth_token: String = ""
+var auth_token: String = ""
 
 var _http: HTTPRequest
 var last_texture: Texture2D
