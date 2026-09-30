@@ -3,12 +3,11 @@ extends Node
 ## Bring-your-own-Pollen authentication for Pollinations.
 ##
 ## Two ways to authenticate:
-##  1. [b]API key[/b] - set [member api_key] (or the POLLINATIONS_API_KEY
-##     environment variable) to a publishable `pk_` key for development.
-##  2. [b]Device flow[/b] - call [method start_device_flow]. Players visit
+##  1. [b]Development key[/b] - set POLLINATIONS_API_KEY in the environment.
+##  2. [b]Device flow[/b] - set a publishable app_key and call
+##     [method start_device_flow]. Players visit
 ##     enter.pollinations.ai/device, enter the shown code and approve with
-##     their own Pollen. A secret `sk_` token is returned and stored in
-##     memory (optionally in project settings via [member store_token]).
+##     their own Pollen. Their `sk_` token is kept in memory only.
 
 signal device_flow_started(user_code: String, verification_url: String)
 signal device_flow_authorized(token: String)
@@ -19,13 +18,9 @@ const ENTER_URL := "https://enter.pollinations.ai"
 const VERIFICATION_PAGE := "https://enter.pollinations.ai/device"
 const HTTP_NODE_NAME := "PollinationsAuthHTTP"
 
-## Publishable API key (pk_...). Used directly as the bearer token when set.
-## NEVER put a secret sk_ token here - use the device flow for players.
-@export var api_key: String = ""
-
-## When true, a token obtained through the device flow is written to
-## `pollinations/auth/secret_token` in project settings (config/user.tres).
-@export var store_token: bool = true
+## Publishable app key (pk_...) identifying your game for the device flow.
+## Never put a secret sk_ token in an exported property.
+@export var app_key: String = ""
 
 ## Poll interval for the device flow, in seconds. The server asks for 5.
 @export var poll_interval: float = 5.0
@@ -47,17 +42,10 @@ func _make_http() -> HTTPRequest:
 	return h
 
 
-## Returns the best available token: an explicit api_key, a token from the
-## device flow, a previously stored user token, or the POLLINATIONS_API_KEY
-## environment variable. Empty string means "try anonymous".
+## Returns a player token or a development key from the environment.
+## Empty string means "try anonymous". app_key is not a generation token.
 func get_auth_token() -> String:
-	if not api_key.is_empty():
-		return api_key
 	if not token.is_empty():
-		return token
-	var stored := ProjectSettings.get_setting("pollinations/auth/secret_token", "") as String
-	if not stored.is_empty():
-		token = stored
 		return token
 	var env := OS.get_environment("POLLINATIONS_API_KEY")
 	if not env.is_empty():
@@ -70,11 +58,9 @@ func has_token() -> bool:
 	return not get_auth_token().is_empty()
 
 
-## Forget the stored user token (e.g. after "log out").
+## Forget the in-memory user token (e.g. after "log out").
 func clear_token() -> void:
 	token = ""
-	ProjectSettings.set_setting("pollinations/auth/secret_token", "")
-	ProjectSettings.save()
 
 
 ## STEP 1 - ask the auth server for a device code + user code.
@@ -82,10 +68,10 @@ func clear_token() -> void:
 func start_device_flow() -> Error:
 	if _polling:
 		return ERR_ALREADY_IN_USE
-	var body := "{}"
-	# A publishable client id may be provided; the endpoint also works without.
-	if not api_key.is_empty() and api_key.begins_with("pk_"):
-		body = JSON.stringify({"client_id": api_key})
+	if not app_key.begins_with("pk_"):
+		device_flow_failed.emit("Set your game's publishable app key (pk_...) before connecting")
+		return ERR_INVALID_PARAMETER
+	var body := JSON.stringify({"client_id": app_key})
 	var err := _http.request(
 		ENTER_URL + "/api/device/code",
 		["Content-Type: application/json", "Accept: application/json"],
@@ -135,9 +121,6 @@ func _poll_loop() -> void:
 		if access.begins_with("sk_"):
 			_polling = false
 			token = access
-			if store_token:
-				ProjectSettings.set_setting("pollinations/auth/secret_token", access)
-				ProjectSettings.save()
 			device_flow_authorized.emit(access)
 			device_flow_finished.emit()
 			return
